@@ -1,0 +1,42 @@
+CREATE OR REPLACE FUNCTION list_r_avg() 
+RETURNS TABLE ( stu_id integer, ravg float ) AS $$ 
+DECLARE 
+    curs CURSOR FOR (SELECT sid, score from exams order by sid);
+    current_student RECORD;
+    previous_sid INTEGER;
+BEGIN 
+    open curs;
+    FETCH curs INTO current_student;
+    previous_sid := current_student.sid;
+
+    LOOP
+        FETCH curs INTO current_student;
+        IF NOT FOUND
+        THEN RETURN QUERY
+            WITH constant_id as(
+                values(previous_sid)
+            )   
+            SELECT * FROM (
+                constant_id
+                CROSS JOIN (
+                    SELECT * FROM revised_avg(previous_sid)
+                ) AS join_1
+            ) AS row;
+            EXIT;
+        END IF;
+        IF current_student.sid > previous_sid
+        THEN RETURN QUERY
+            WITH constant_id as(
+                values(previous_sid)
+            )   
+            SELECT * FROM (
+                constant_id
+                CROSS JOIN (
+                    SELECT * FROM revised_avg(previous_sid)
+                ) AS join_1
+            ) AS row;
+            previous_sid = current_student.sid;
+        END IF;
+    END LOOP;
+END; 
+$$ LANGUAGE plpgsql;

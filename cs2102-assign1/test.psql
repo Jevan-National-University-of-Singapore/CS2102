@@ -1,0 +1,2 @@
+SELECT * FROM list_r_avg();
+SELECT * FROM exams;

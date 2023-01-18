@@ -1,0 +1,35 @@
+create or replace function bal_check_func() returns trigger
+as $$
+declare
+	total_bal int;
+	tmp_name text;
+begin
+	if (TG_OP = 'DELETE') then
+		tmp_name := OLD.name;
+	else
+		tmp_name := NEW.name;
+	end if;
+
+	select sum(bal) into total_bal
+	from account
+	where name = tmp_name;
+	
+	if (total_bal < 150) then
+		raise exception '% has insufficient balance.', tmp_name;
+	end if;
+
+	return null;
+end;
+$$ language plpgsql;
+
+create constraint trigger bal_check_trigger
+after insert or update or delete on account
+deferrable initially immediate
+for each row
+execute function bal_check_func();
+
+begin transaction;
+set constraints bal_check_trigger deferred;
+update account set bal = bal - 100 where aid = 1;
+update account set bal = bal + 100 where aid = 2;
+end transaction;

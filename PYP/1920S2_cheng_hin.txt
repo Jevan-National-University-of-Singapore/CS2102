@@ -1,0 +1,109 @@
+10)
+• Each professor is identiﬁed by pid and has a name given by pname.
+Each professor specializes in one or more areas. (True. Profs has PK pid, and pname text field)
+• Each area is identiﬁed by aid and has a name given by aname. (True. Areas has aid PK, has aname text)
+• Each course is identiﬁed by cid and has a name given by cname. (True. Has cid PK and cname text)
+• Each course belongs to exactly one area (identiﬁed by aid). (True. cid is pk and holds a reference to Areas using aid)
+• Each professor teaches 0 or more courses. (X in teaches table, no ref to courses.)
+• If a professor P teaches a course C, then the area associated with C must
+be an area that P specializes in. (X Assuming cid in Teaches is the course id, Teaches table does not ref Courses using both cid, aid.)
+• Each course is taught by 0 or more professors. (True. As PK is (pid, cid), each cid can have multiple pids. If not taught by any, can have no entry)
+• All identiﬁers (i.e., pid, aid, and cid) have integer domains. (True)
+• All names (i.e., pname, aname, and cname) have text domains. (True)
+• The values of attribute aid must be non-null (True. aid is either used in a pk or has not null)
+
+
+11)
+Yes.
+
+12)
+Common attri of R1 and R2: B
+{B}+ = {ABC}
+superkey of R1. Lossless
+
+Merge R1 and 2 to get R1_2 (ABCDE)
+Common attr of R1_2 and R3: CD
+superkey of R3. Lossless.
+
+Yes.
+
+13)
+Yes.
+
+A+ = ABC
+B+ = ABC
+C+ = ABC
+D -> ABCD
+
+R1 fds: A -> C, B->A, C->B
+R2 fds: D->B
+R3 fds: D->C
+new FDs: {A -> C, B->A, C->B, D->B, D->C}
+
+Derive old fds from new fds. A -> C, B->A, C->B are the same.
+Obtain D->A using transitivity on D->B and B->A
+
+new FDs was derived from old FDs by closure of attributes.
+
+Their FDs are equivalent. It is dependency preserving.
+
+14)
+R2 not in FDs:
+B -> A violates as {B}+ = {ABC}
+
+15)
+Decompose using A
+R1 ABC and R2 ADE
+decompose using D
+R3 AD and R4 DE
+
+ABC, AD, DE
+
+16)
+create view v16(cid) as 
+with OrderPrice as (
+select oid, sum(order_price) as total_order_price
+from (
+select oid, coalesce(price * qty, 0) as order_price
+from orders natural left join OrderItems natural join Items
+) as T
+group by oid
+)
+select distinct cid
+from customers C natural join orders O
+where (select total_order_price from OrderPrice OP where OP.oid = O.oid) >= 200;
+
+17)
+create or replace view v17(cid) as
+with TotalOrderPrice as (
+select cid, sum(order_price) as total_order_price, month
+from (
+select cid, coalesce(qty * price, 0) as order_price, month
+	from Customers natural left join Orders natural left join OrderItems natural left join Items
+) as T
+group by cid, month
+), First as (
+select cid
+from Customers
+except
+select cid
+from TotalOrderPrice
+where total_order_price < 200 and total_order_price > 0
+), Second as (
+	select cid
+	from Customers
+	except
+select cid
+from TotalOrderPrice OP
+where total_order_price > 0 and total_order_price < any (
+select total_order_price
+from TotalOrderPrice OP1
+where OP.month = OP1.month and OP1.cid <> OP.cid)
+)
+select cid
+from First natural join Second;
+
+
+
+
+

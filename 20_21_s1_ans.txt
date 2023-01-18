@@ -1,0 +1,89 @@
+1.
+__A__ = m1,m2
+__B__ = m1<>m2
+__c__ = p1=p2
+
+2.
+A = p
+B = p
+C = s
+D = s2
+E = s1
+
+3.
+1: pid
+2: PRIMARY KEY
+3: pname
+4: pid
+5: projects(pid)
+6: matric
+7: students(matric)
+8: since
+9: pid
+10: projects(pid)
+11: cname
+
+4.
+A: C0.cname
+B: C0.pid = P1.pid
+C: C0.pid = P2.pid
+D: P1.pid <> P2.pid
+E: INTERSECT
+F: UNION
+
+5.
+P01
+P03
+P03
+P04
+P05
+-
+
+6.
+AD -> E
+BE -> C
+BE -> A
+BE -> D
+
+7.
+BE
+BAD
+BCD
+BDE
+
+8.
+BE
+BAD
+BCD
+-
+
+9.
+CDE
+ADC
+ADB
+
+10.
+No
+
+11.
+AD -> C
+CD -> E
+BE -> A
+BE -> D
+
+12.
+ADC
+CDE
+ABDE
+
+13.
+AC->BC (given)
+BC -> B (reflexivity)
+AC -> B (transitivity)
+
+14.
+On the big box encapsulating the diamond
+Diamond to diamond should have a black thingy to show aggregation
+
+15.
+Primary key of R1

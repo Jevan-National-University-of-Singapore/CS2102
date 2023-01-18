@@ -1,0 +1,23 @@
+CREATE OR REPLACE FUNCTION revised_avg( IN stu_id integer, OUT r_avg float ) 
+RETURNS float as $$
+DECLARE
+    count INTEGER;
+    max_cid INTEGER;
+    min_cid INTEGER;
+    
+BEGIN
+    SELECT count(*) INTO count
+    FROM Exams
+    WHERE sid=stu_id;
+
+    IF count < 3
+    THEN r_avg := NULL;
+    ELSE
+        SELECT * FROM max_min(stu_id) INTO max_cid, min_cid;
+
+        SELECT avg(score) INTO r_avg
+        FROM Exams
+        WHERE sid=stu_id AND cid <> max_cid AND cid <> min_cid;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
